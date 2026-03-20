@@ -1,0 +1,711 @@
+---
+title: "In_class_activity_Week8"
+output: pdf_document
+date: "2026-03-18"
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## In Class Activity Week 8
+
+### Activity 2
+
+-   Inductive conformal prediction is the idea to split the data into a training set and a calibration set. The model is fit only once on the training set, and the calibration set is used to compute nonconformity scores and determine the prediction set.
+
+-   Full conformal prediction is when for each candidate response value $y$ for the new point $x_{n+1}$, it adds the point to the dataset with $(x_{n+1},y)$. It then refits the method on the augmented data, and computes the conformity ranking using all $n+1$ observations.
+
+### Activity 3
+
+Show that the Karush-Kuhn-Tucker (KKT) conditions for the augmented
+Lasso problem are given by:
+
+$$
+0 \in -\tilde{X}^\top \left[\tilde{y}(y) - \tilde{X}\beta\right] + \lambda \, \frac{\partial}{\partial \beta}\|\beta\|_1,
+$$
+
+where the component-wise subgradient of the $L_1$ norm is
+
+$$
+\frac{\partial}{\partial \beta_j}\|\beta\|_1 =
+\begin{cases}
+\operatorname{sign}(\beta_j) & \text{if } \beta_j \neq 0, \\
+[-1,1] & \text{if } \beta_j = 0.
+\end{cases}
+$$
+
+Explicitly separate the contribution from the variable argument $y$ from
+the (fixed) first $n$ labels.
+
+#### Solution:
+
+The objective function is:
+
+$$
+\tilde{\ell}(\beta \mid y)
+=
+\frac{1}{2}\|\tilde{y}(y)-\tilde{X}\beta\|_2^2+\lambda\|\beta\|_1.
+$$
+
+The KKT condition says: since $\tilde{\ell}(\beta \mid y)$ is a convex
+function of $\beta$, a vector $\beta$ is optimal if and only if
+
+$$
+0 \in \partial \tilde{\ell}(\beta \mid y),
+$$
+
+where $\partial$ denotes the subgradient with respect to $\beta$.
+
+Now we derive what this condition means:
+
+The first term is a quadratic term:
+
+$$
+\frac{1}{2}\|\tilde{y}(y)-\tilde{X}\beta\|_2^2,
+$$
+
+and the gradient is computed as:
+
+$$
+\nabla_\beta \left( \frac{1}{2}\|\tilde{y}(y)-\tilde{X}\beta\|_2^2 \right)
+=
+-\tilde{X}^\top \bigl[\tilde{y}(y)-\tilde{X}\beta\bigr].
+$$
+
+Then, the second term is
+
+$$
+\lambda\|\beta\|_1.
+$$
+
+The subgradient is defined as, for each coordinate $\beta_j$,
+
+$$
+\frac{\partial}{\partial \beta_j}\|\beta\|_1
+=
+\begin{cases}
+\operatorname{sign}(\beta_j), & \text{if } \beta_j \neq 0, \\[6pt]
+[-1,1], & \text{if } \beta_j = 0.
+\end{cases}
+$$
+
+So we obtain by combining the 2 terms
+
+$$
+0 \in
+-\tilde{X}^\top \bigl[\tilde{y}(y)-\tilde{X}\beta\bigr]
++
+\lambda\frac{\partial}{\partial \beta}\|\beta\|_1
+$$
+
+For the next step, firs observe:
+
+$$
+\tilde{y}(y)-\tilde{X}\beta
+=
+\begin{pmatrix}
+\textbf{y} - X\beta \\
+y - x_{n+1}^\top \beta
+\end{pmatrix}.
+$$
+
+Then the first subgradient term is now
+
+$$
+-\tilde{X}^\top \bigl[\tilde{y}(y)-\tilde{X}\beta\bigr]
+=
+-X^\top (\textbf{y}-X\beta) - x_{n+1}(y-x_{n+1}^\top\beta).
+$$
+
+So the entire KKT condition is:
+
+$$
+0 \in
+- X^\top (\textbf{y}-X\beta)
+- x_{n+1}(y-x_{n+1}^\top\beta)
++\lambda\frac{\partial}{\partial \beta}\|\beta\|_1.
+$$
+
+
+which is equivalent to
+
+$$
+0 \in
+\bigl(X^\top X + x_{n+1}x_{n+1}^\top\bigr)\beta
+-
+\bigl(X^\top \textbf{y} + x_{n+1}y\bigr)
++\lambda\frac{\partial}{\partial \beta}\|\beta\|_1.
+$$
+
+The term only involving $y$ is visible.
+
+
+### Activity 4
+
+#### Solution:
+
+We are given the assumptions that when $y$ varies in $[y_k, y_{k+1}]$, the active set
+
+$$
+\mathcal A = \{j : \hat\beta_j(y) \neq 0\}
+$$
+
+and the sign vector
+
+$$
+\mathbf{s}_{\mathcal A} = \bigl(\operatorname{sign}(\hat\beta_j(y))\bigr)_{j \in \mathcal A}
+$$
+
+remain constant.
+
+We want to prove that on this interval, the active coefficients are an affine function of $y$:
+
+$$
+\hat\beta_{\mathcal A}(y) = \mathbf{u}_{\mathcal A} + \mathbf{v}_{\mathcal A} y.
+$$
+
+First, we revisit the KKT conditions:
+
+$$
+0 \in -\tilde X^\top \bigl[\tilde y(y) - \tilde X \beta\bigr] + \frac{\partial}{\partial \beta}\|\beta\|_1.
+$$
+
+If we only restrict the domain to the active coordinates $\mathcal A$, where the coordinates are non-zero, the subgradient of the second term is the sign of the coordinate:
+
+$$
+\frac{\partial}{\partial \beta}\|\beta\|_1 = \operatorname{sign}(\beta_j) = \mathbf{s}_{\mathcal A j}, \qquad j \in \mathcal A.
+$$
+
+So the KKT conditions for these active coordinates become
+
+$$
+0 =
+-\tilde X_{\mathcal A}^\top \bigl[\tilde y(y) - \tilde X_{\mathcal A}\beta_{\mathcal A}(y)\bigr]
++ \lambda \mathbf{s}_{\mathcal A}.
+$$
+
+Here $\tilde X_{\mathcal A}$ denotes the matrix formed by the active columns of $\tilde X$.
+
+Now, we rearrange the equation and we get
+
+$$
+\tilde X_{\mathcal A}^\top \tilde X_{\mathcal A}\,\beta_{\mathcal A}(y)
+=
+\tilde X_{\mathcal A}^\top \tilde y(y) - \lambda \mathbf{s}_{\mathcal A}.
+$$
+
+So we obtain
+
+$$
+\hat\beta_{\mathcal A}(y)
+=
+\bigl(\tilde X_{\mathcal A}^\top \tilde X_{\mathcal A}\bigr)^{-1}
+\left(\tilde X_{\mathcal A}^\top \tilde y(y) - \lambda \mathbf{s}_{\mathcal A}\right). \qquad(*)
+$$
+
+No we use the observation that
+
+$$
+\tilde X =
+\begin{pmatrix}
+X \\
+x_{n+1}^\top
+\end{pmatrix},
+\qquad
+\tilde y(y) =
+\begin{pmatrix}
+\textbf{y} \\
+y
+\end{pmatrix}.
+$$
+
+to get a representation of the active coordinates:
+
+$$
+\tilde X_{\mathcal A}
+=
+\begin{pmatrix}
+X_{\mathcal A} \\
+x_{n+1,\mathcal A}^\top
+\end{pmatrix},
+$$
+
+where $X_{\mathcal A}$ is the active submatrix of the covariates. And $x_{n+1,\mathcal A}$ is the transpose of the active portion of the covariates of the new observation $x_{x+1,\mathcal{A}}$.
+
+Then we have:
+
+$$
+\tilde X_{\mathcal A}^\top \tilde y(y)
+=
+X_{\mathcal A}^\top \textbf{y} + x_{n+1,\mathcal A}\, y,
+$$
+
+and
+
+$$
+\tilde X_{\mathcal A}^\top \tilde X_{\mathcal A}
+=
+X_{\mathcal A}^\top X_{\mathcal A} + x_{n+1,\mathcal A}x_{n+1,\mathcal A}^\top.
+$$
+
+Therefore plugging those into $(*)$, we will get:
+
+$$
+\begin{aligned}
+\hat\beta_{\mathcal A}(y) &= \left(X_{\mathcal A}^\top X_{\mathcal A} + x_{n+1,\mathcal A}x_{n+1,\mathcal A}^\top\right)^{-1} \left(X_{\mathcal A}^\top \textbf{y} + x_{n+1,\mathcal A}y - \lambda \mathbf{s}_{\mathcal A}\right)\\
+&= \left(X_{\mathcal A}^\top X_{\mathcal A}
++ x_{n+1,\mathcal A}x_{n+1,\mathcal A}^\top\right)^{-1}
+\left(X_{\mathcal A}^\top \textbf{y} - \lambda s_{\mathcal A}\right) + \left(X_{\mathcal A}^\top X_{\mathcal A} + x_{n+1,\mathcal A}x_{n+1,\mathcal A}^\top\right)^{-1} x_{n+1,\mathcal A}\, y.
+\end{aligned}
+$$
+
+We can see that we have separated the term involving $y$ and now we need to define some vectors $\mathbf{u}$ and $\mathbf{v}$:
+
+Let:
+
+$$
+\mathbf{u}_{\mathcal A}
+=
+\left(X_{\mathcal A}^\top X_{\mathcal A}
++ x_{n+1,\mathcal A}x_{n+1,\mathcal A}^\top\right)^{-1}
+\left(X_{\mathcal A}^\top \textbf{y} - \lambda s_{\mathcal A}\right),
+$$
+
+and
+
+$$
+\mathbf{v}_{\mathcal A}
+=
+\left(X_{\mathcal A}^\top X_{\mathcal A}
++ x_{n+1,\mathcal A}x_{n+1,\mathcal A}^\top\right)^{-1}
+x_{n+1,\mathcal A}.
+$$
+
+Then
+
+$$
+\hat\beta_{\mathcal A}(y) = \mathbf{u}_{\mathcal A} + \mathbf{v}_{\mathcal A} y.
+$$
+
+
+
+### Activity 5
+
+
+#### Solution
+
+We need to find the values of $y$ where these events occur:
+
+- an active variable drops out because its coefficient reaches $0$;
+- an inactive variable joins because its KKT inequality becomes active.
+
+##### an active variable drops out: coefficient hits $0$
+
+We have seen that for $j \in \mathcal A$, the estimated LASSO coefficient is
+
+$$
+\hat\beta_j(y) = \mathbf{u}_j + \mathbf{v}_j y
+$$
+
+When this value hits 0, we will solve:
+
+$$
+\mathbf{u}_j + \mathbf{v}_j y = 0.
+$$
+
+Solving for $y$ gives the candidate dropout point
+
+$$
+y^{\text{dropout}}_j = -\frac{\mathbf{u}_j}{\mathbf{v}_j}, \qquad j \in \mathcal A,\; \mathbf{v}_j \neq 0.
+$$
+
+
+##### an inactive variable becomes active
+
+We first for the sake of simplicity use $r(y)$ to represent the residual:
+
+$$
+r(y)=\tilde y(y)-\tilde X\hat\beta(y)
+$$
+
+Then, The KKT conditions for LASSO are
+
+$$
+0 \in -\tilde X^\top r(y)+\lambda\,\frac{\partial}{\partial \beta}\|\beta\|_1.
+$$
+
+For the $j$-th coordinate, it is:
+
+$$
+0 \in -\tilde x_j^\top r(y)+\lambda\,\frac{\partial}{\partial \beta_j}\|\beta\|_1.
+$$
+
+Now if the variable $j$ is currently inactive, it means $\hat\beta_j(y)=0.$, then its subgradient at $0$ is $\frac{\partial}{\partial \beta_j}\|\beta\|_1=[-1,1].$
+
+Therefore the $j$-th KKT condition becomes
+
+$$
+0 \in -\tilde x_j^\top r(y)+\lambda[-1,1].
+$$
+
+This means that there exists some $s_j\in[-1,1]$ such that
+
+$$
+0=-\tilde x_j^\top r(y)+\lambda s_j.
+$$
+Rearranging gives
+
+$$
+\tilde x_j^\top r(y)=\lambda s_j
+\qquad\text{for some } s_j\in[-1,1].
+$$
+Since $s_j\in[-1,1]$, this is equivalent to
+
+$$
+\tilde x_j^\top r(y)\in[-\lambda,\lambda],
+$$
+equivalently,
+
+$$
+|\tilde x_j^\top r(y)|\le \lambda.
+$$
+
+
+With the above, we observe that a variable becomes active when the equality holds:
+
+$$
+|\tilde x_j^\top r(y)|=\lambda.
+$$
+
+Writing out the residual term $r(y)$ and get back this expression:
+
+$$
+\left|\tilde x_j^\top \bigl(\tilde y(y)-\tilde X \hat\beta(y)\bigr)\right| = \lambda.
+$$
+
+This is the condition for it to become active.
+
+
+Notice that for inactive variables, they don't appear in the calculation of the residuals, because they are all 0. Then the residuals can be represented using the active variables. Here we are also using the property we derived from Activity 5 for active variables to write the residuals out:
+
+$$
+r(y)=\tilde y(y)-\tilde X_{\mathcal A}\hat\beta_{\mathcal A}(y)
+=\tilde y(y)-\tilde X_{\mathcal A}(\mathbf{u}_{\mathcal A} + \mathbf{v}_{\mathcal A} y).
+$$
+
+Now $\tilde y(y)$ depends linearly on $y$, so $r(y)$ is also affine in $y$. Therefore, for each inactive variable $j \notin \mathcal A$,
+
+$$
+\tilde x_j^\top r(y)
+$$
+
+is an affine function of $y$. Write it as
+
+$$
+\begin{aligned}
+\tilde x_j^\top r(y) &= \tilde x_j^\top \bigl(\tilde y(0)-\tilde X_{\mathcal A}\mathbf{u}_{\mathcal A}\bigr) + \tilde x_j^\top \bigl(e_{n+1}-\tilde X_{\mathcal A}\mathbf{v}_{\mathcal A}\bigr) y\\
+&= \alpha_j + \beta_j y,
+\end{aligned}
+$$
+
+where
+
+$$
+\alpha_j = \tilde x_j^\top \bigl(\tilde y(0)-\tilde X_{\mathcal A}\mathbf{u}_{\mathcal A}\bigr),
+$$
+
+and
+
+$$
+\beta_j = \tilde x_j^\top \bigl(e_{n+1}-\tilde X_{\mathcal A}\mathbf{v}_{\mathcal A}\bigr).
+$$
+
+and $e_{n+1}$ is the $(n+1)$-dimensional vector with $1$ in the last position and $0$ elsewhere.
+
+
+Finally we can see that the joining condition becomes
+
+$$
+|\alpha_j+\beta_j y|=\lambda.
+$$
+
+This is equivalent to
+
+$$
+\alpha_j+\beta_j y=\lambda
+\qquad\text{or}\qquad
+\alpha_j+\beta_j y=-\lambda.
+$$
+
+Solving for $y$, we have the points that become active from inactive are those satisfying:
+
+$$
+y^{\text{joinin}}_j = \frac{\lambda-\alpha_j}{\beta_j},
+\qquad \frac{-\lambda-\alpha_j}{\beta_j},
+\qquad j \notin \mathcal A,\; \beta_j \neq 0.
+$$
+
+##### So we conclude that the points marking the knots are as such:
+
+- for active variables $j \in \mathcal A$,
+
+$$
+y = -\frac{\mathbf{u}_j}{\mathbf{v}_j};
+$$
+
+- for inactive variables $j \notin \mathcal A$,
+
+$$
+y = \frac{\lambda-a_j}{b_j}
+\qquad\text{or}\qquad
+y = \frac{-\lambda-a_j}{b_j}.
+$$
+
+
+
+### Activity 6
+
+#### Solution
+
+We have shown that in Activity 4 inside an interval $[y_k,y_{k+1}]$ where the active set $\mathcal A$ and the sign vector remain fixed,  the active coefficients are affine in $y$:
+
+$$
+\hat\beta_{\mathcal A}(y)=\mathbf{u}_{\mathcal A}+\mathbf{v}_{\mathcal A}y.
+$$
+
+Since the inactive coordinates are zero: $\hat\beta_j(y)=0$ for all $j\notin\mathcal A$, the full coefficient vector $\hat\beta(y)$ is thereby affine in $y$, and we may write the whole thing the same way:
+
+$$
+\hat\beta(y)=\mathbf{u}+\mathbf{v}y
+$$
+for some vectors $\mathbf{u},\mathbf{v}$, where the inactive coordinates of $\mathbf{u},\mathbf{v}$ are zero.
+
+
+Now, we look that the pre-defined non-conformity score for observation $i\in\{1,\dots,n+1\}$:
+
+$$
+R_i(y)=\left|\tilde y_i(y)-x_i^\top \hat\beta(y)\right|.
+$$
+
+We now treat the first $n$ training observations and the $(n+1)$-st observation separately.
+
+
+##### First n training observations
+
+For the first $n$ training observations, the true $y_i$'s are just their own label, and does not involve $y$, so
+
+$$
+\tilde y_i(y)=y_i.
+$$
+
+Therefore,
+
+$$
+R_i(y)=|y_i-x_i^\top \hat\beta(y)|.
+$$
+
+Substituting $\hat\beta(y)=\mathbf{u}+\mathbf{v}y$, we get
+
+$$
+R_i(y)=|y_i-x_i^\top(\mathbf{u}+\mathbf{v}y)|.
+$$
+
+Expanding gives
+
+$$
+R_i(y)=|(y_i-x_i^\top \mathbf{u})-(x_i^\top \mathbf{v})y|.
+$$
+
+Thus, if we define
+
+$$
+a_i=y_i-x_i^\top \mathbf{u},
+\qquad
+b_i=-x_i^\top \mathbf{v},
+$$
+
+then
+
+$$
+R_i(y)=|a_i+b_i y|.
+$$
+
+##### For the n+1-th observation
+
+For the new observation, the candidate response itself is $y$, so
+
+$$
+\tilde y_{n+1}(y)=y.
+$$
+
+Hence
+
+$$
+R_{n+1}(y)=|y-x_{n+1}^\top \hat\beta(y)|.
+$$
+
+Again substituting $\hat\beta(y)=\mathbf{u}+\mathbf{v}y$, we obtain
+
+$$
+R_{n+1}(y)=|y-x_{n+1}^\top(\mathbf{u}+\mathbf{v}y)|.
+$$
+
+Expanding gives
+
+$$
+R_{n+1}(y)=|-x_{n+1}^\top \mathbf{u}+(1-x_{n+1}^\top \mathbf{v})y|.
+$$
+
+Thus, if we define
+
+$$
+a_{n+1}=-x_{n+1}^\top \mathbf{u},
+\qquad
+b_{n+1}=1-x_{n+1}^\top \mathbf{v},
+$$
+
+then
+
+$$
+R_{n+1}(y)=|a_{n+1}+b_{n+1}y|.
+$$
+
+Therefore, for every observation $i\in\{1,\dots,n+1\}$, the residual can be written in the form
+
+$$
+R_i(y)=|a_i+b_i y|
+$$
+
+for some constants $a_i,b_i$ on the interval $[y_k,y_{k+1}]$.
+
+
+
+
+### Activity 7
+
+#### Solution
+
+We have shown in Activity 7 that the residuals on a fixed interval $[y_k,y_{k+1}]$ is an affine transformation of $y$:
+
+$$
+R_i(y)=|a_i+b_i y|,
+\qquad i=1,\dots,n+1,
+$$
+
+The rank of $R_{n+1}(y)$ changes only when its ordering relative to one of the training residuals changes, i.e. $R_{n+1}(y)$ is equal to some training residual $R_i(y)$, $i=1,\dots,n$, whey they satisfy:
+
+$$
+R_{n+1}(y)=R_i(y),
+\qquad i=1,\dots,n.
+$$
+
+Using the results from Activity 6, this becomes
+
+$$
+|a_{n+1}+b_{n+1}y|=|a_i+b_i y|,
+\qquad i=1,\dots,n.
+$$
+
+Now we need some useful properties here. We know that for any two vectors $\mu$ and $nu$:
+
+$$
+|\mu|=|\nu|
+\quad\Longleftrightarrow\quad
+\mu=\nu \text{ or } \mu=-\nu.
+$$
+
+So the above equality suggest these 2 possibilities below:
+
+$$
+a_{n+1}+b_{n+1}y=a_i+b_i y. \qquad \text{and} \qquad a_{n+1}+b_{n+1}y=-(a_i+b_i y).
+$$
+In the first case, we have
+
+$$
+\begin{aligned}
+(b_{n+1}-b_i)y &= a_i-a_{n+1}\\
+y &= \frac{a_i-a_{n+1}}{b_{n+1}-b_i}.
+\end{aligned}
+$$
+
+when $b_{n+1}\neq b_i$
+
+
+For the second case:
+
+$$
+\begin{aligned}
+a_{n+1}+b_{n+1}y &= -(a_i+b_i y)\\
+(b_{n+1}+b_i)y &= -a_i-a_{n+1}.\\
+y&=\frac{-a_i-a_{n+1}}{b_{n+1}+b_i}.
+\end{aligned}
+$$
+
+Therefore, on the interval $[y_k,y_{k+1}]$, the candidate knot points where the rank of $R_{n+1}(y)$ may change are
+$$
+y_{i,1}=\frac{a_i-a_{n+1}}{b_{n+1}-b_i}, \qquad\text{and}\qquad y_{i,2}=\frac{-a_i-a_{n+1}}{b_{n+1}+b_i},
+\qquad i=1,\dots,n,
+$$
+whenever the denominators are nonzero.
+
+
+
+### Activity 8
+
+We have acquired from the above that for this particular LASSO problem, we don't need to grid search all possible $y$ values. Instead, we can only look at the knots we computed in Activity 7, where the rank would actually change. So now we formulate the algorithm as follows:
+
+#### Step 1
+
+Choose an initial value of $y$ and solve the augmented Lasso problem. From this solution, determine the current active set $\mathcal A$ and sign vector $s_{\mathcal A}$.
+
+#### Step 2
+
+Compute the candidate values of $y$ where the current active set may change, i.e. find dropout points where some active coefficient hits zero; and joining points, where some inactive variable reaches the KKT boundary. 
+
+#### Step 3:
+
+Calculate the residuals as
+
+$$
+R_i(y)=|a_i+b_i y|,
+\qquad i=1,\dots,n+1.
+$$
+
+#### Step 4
+
+Find all values of $y$ inside the current interval where the target residual intersects a training residual:
+
+$$
+R_{n+1}(y)=R_i(y),
+\qquad i=1,\dots,n.
+$$
+These are exactly the points where the rank of $R_{n+1}(y)$ can change.
+
+#### Step 5
+  
+Now for the specific interval $[y_k, y_{k+1}]$, we acquired the partitions of this current interval into smaller subintervals on which the active set is fixed, and the ordering of $R_{n+1}(y)$ relative to all training residuals is fixed.
+
+Hence the rank of $R_{n+1}(y)$ is constant on each such subinterval.
+
+#### Step 6
+
+A $y$ is included if the rank of $R_{n+1}(y)$ among all $n+1$ residuals is at most
+
+$$
+\lceil (n+1)(1-\epsilon)\rceil.
+$$
+
+Since the rank is constant on each subinterval from Step 5, it is enough to evaluate the rank at any point in each subinterval to get the rank for that subinterval.
+
+### Step 7: collect all accepted subintervals
+
+Take the union of all subintervals on which the conformal rank condition is satisfied. This union is the full conformal prediction set
+
+$$
+C(x_{n+1};\epsilon).
+$$
+
